@@ -1,46 +1,43 @@
-# from datetime import date
-# from flet import Text, TextField
-
 import flet as ft
-import datetime as dt
-
-
+# задание 2: добавить любимые имена
+# задание 4: добавить ограничение по длине истории
 def main(page: ft.Page):
     page.title = 'Мое первое приложение'
-    page.theme_mode = ft.ThemeMode.LIGHT
+    page.theme_mode = ft.ThemeMode.DARK
     greeting_text = ft.Text(value='Hello world')
-    
-    # greeting_text.value = 'Привет мир'
-    # greeting_text.color = ft.Colors.GREEN
-
+    greeting_history = []
+    history_text = ft.Text(value='История приветствий')
+    favorite_names = []
+    favorites_text = ft.Text(value='Избранные имена:')
     def on_button_click(_):
         print(name_input.value)
         name = name_input.value.strip()
-        
-        time_now = dt.datetime.now().strftime("%Y:%m:%d - %H:%M:%S")
-
         if name:
-            greeting_text.value = f'{time_now} Hello {name}'
+            greeting_text.value = f'Hello {name}'
             greeting_text.color = None
+            name_input.value = ""
+            greeting_history.append(name)
+            greeting_history[:] = greeting_history[-5:]
+            history_text.value = "История приветствий: \n" + "\n".join(greeting_history)
+
         else:
             greeting_text.value = 'Введите корректное имя'
             greeting_text.color = ft.Colors.RED
+            
         page.update()
-    def theme_dark_or_light(_):
-        if page.theme_mode == ft.ThemeMode.LIGHT:
-            page.theme_mode = ft.ThemeMode.DARK
-        else:
-            page.theme_mode = ft.ThemeMode.LIGHT
+    
+    def clear_history(_):
+        greeting_history.clear()
+        history_text.value = "История приветствий:"
         page.update()
+    def add_to_favorites(_):
+        name = name_input.value.strip()
+        if name: 
+            favorite_names.append(name)
+            favorites_text.value = "Избранные имена:\n" + "\n".join(favorite_names)
+            page.update()
 
-    name_input = ft.TextField(label='Введите имя', on_submit=on_button_click)
-
-    # elevated_button = ft.ElevatedButton(text="send", on_click=on_button_click, icon=ft.Icons.SEND, color=ft.Colors.GREEN, icon_color=ft.Colors.RED)
-
-    # text_button = ft.TextButton(text='send', on_click=on_button_click, icon=ft.Icons.SEND)
-
-    # icon_button = ft.IconButton(icon=ft.Icons.BRIGHTNESS_6, on_click=on_button_click)
-
+    name_input = ft.TextField(label='Введите имя', on_submit=on_button_click, expand=True)
     send_button = ft.ElevatedButton(
         text = "Отправить",
         on_click = on_button_click,
@@ -49,11 +46,8 @@ def main(page: ft.Page):
         icon_color = ft.Colors.BLUE
     )
 
-    theme_button = ft.IconButton(
-        icon = ft.Icons.BRIGHTNESS_7,
-        on_click = theme_dark_or_light
-    )
-
-    page.add(greeting_text, name_input, send_button, theme_button)
+    clear_button = ft.IconButton(icon=ft.Icons.DELETE, on_click=clear_history)
+    favorite_button = ft.ElevatedButton(text="В избранное", on_click=add_to_favorites, color=ft.Colors.YELLOW)
+    page.add(greeting_text, ft.Row([name_input, send_button, clear_button]), history_text, ft.Row([favorite_button]), favorites_text)
 
 ft.app(target=main)
